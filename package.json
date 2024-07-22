@@ -1,0 +1,35 @@
+{
+  "name": "@semolina-solutions/layer-aware-pointer-events",
+  "version": "0.1.0",
+  "license": "BSD-3-Clause",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc && vite build",
+    "test": "npm run test-chrome && npm run test-edge && npm run test-firefox && npm run test-safari",
+    "test-chrome": "vitest run --browser.name=chrome",
+    "test-edge": "vitest run --browser.name=edge",
+    "test-firefox": "vitest run --browser.name=firefox",
+    "test-safari": "vitest run --browser.name=safari",
+    "watch-chrome": "vitest watch --browser.name=chrome",
+    "watch-edge": "vitest watch --browser.name=edge",
+    "watch-firefox": "vitest watch --browser.name=firefox",
+    "watch-safari": "vitest watch --browser.name=safari"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "@vitest/browser": "^1.6.0",
+    "lit": "^3.1.4",
+    "lit-html": "^3.1.4",
+    "strip-indent": "^4.0.0",
+    "typescript": "^5.5.3",
+    "vite": "^5.3.3",
+    "vite-plugin-dts": "^3.9.1",
+    "vitest": "^1.6.0",
+    "webdriverio": "^8.39.1"
+  }
+}
