@@ -4,7 +4,7 @@
     "type": "git",
     "url": "git+https://github.com/semolina-solutions/layer-aware-pointer-events"
   },
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "BSD-3-Clause",
   "type": "module",
   "main": "dist/index.js",
