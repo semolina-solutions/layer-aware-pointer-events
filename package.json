@@ -1,5 +1,9 @@
 {
   "name": "@semolina-solutions/layer-aware-pointer-events",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/semolina-solutions/layer-aware-pointer-events"
+  },
   "version": "0.1.0",
   "license": "BSD-3-Clause",
   "type": "module",
