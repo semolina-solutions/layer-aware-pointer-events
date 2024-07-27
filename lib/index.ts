@@ -12,6 +12,15 @@ export interface ElementTree {
 }
 
 /**
+ * A function that returns the initialization properties supplied as the
+ * `eventInitDict` argument to the constructor of the `MouseEvent` (or
+ * derivative) class.
+ */
+export type MouseEventInitDictBuilder = (
+  originalEvent: MouseEvent
+) => MouseEventInit
+
+/**
  * Continues an event dispatch to all remaining underlying elements.
  *
  * This is an event listener that can be installed on an element that contains
@@ -20,13 +29,20 @@ export interface ElementTree {
  * element it's attached to via bubbling up, and it should continue to call the
  * underlying layers to ensure all elements receive the event.
  *
- * @param event A `MouseEvent` that bubbled up to a container of layered
- *    elements.
+ * @param event A `MouseEvent` (or derivative) that bubbled up to a container
+ *     of layered elements.
+ * @param mouseEventInitDictBuilder See `MouseEventInitDictBuilder` docstring.
+ *     The default supplied clones all properties for `MouseEvent` and known
+ *     derivatives (`DragEvent`, `PointerEvent`, `WheelEvent`). This may be
+ *     overridden to supply subsets or supersets of properties as required.
  */
-export function dispatchToUnderlyingElements(event: MouseEvent) {
+export function dispatchToUnderlyingElements(
+  event: MouseEvent,
+  mouseEventInitDictBuilder: MouseEventInitDictBuilder = getMouseEventInitProperties
+) {
   if (event.defaultPrevented) return
 
-  const { currentTarget, x, y } = event
+  const { currentTarget, type, x, y } = event
   if (!isElement(currentTarget)) {
     throw new Error('Expected event.currentTarget to be an Element')
   }
@@ -48,17 +64,16 @@ export function dispatchToUnderlyingElements(event: MouseEvent) {
     currentTarget
   )
 
+  const eventInitDict = mouseEventInitDictBuilder(event)
+  eventInitDict.bubbles = false
+
   for (const element of subtree) {
     if (defaultPathElementSet.has(element)) continue
 
-    const eventClone = new MouseEvent(event.type, {
-      ...event,
-      cancelable: event.cancelable,
-      bubbles: false,
-    })
+    let clone = constructMouseEvent(event, type, eventInitDict)
 
-    element.dispatchEvent(eventClone)
-    if (eventClone.defaultPrevented) {
+    element.dispatchEvent(clone)
+    if (clone.defaultPrevented) {
       event.preventDefault()
       break
     }
@@ -269,4 +284,134 @@ function isShadowRoot(value: unknown): value is ShadowRoot {
 
 function isDocumentOrShadowRoot(value: unknown): value is DocumentOrShadowRoot {
   return value === document || isShadowRoot(value)
+}
+
+function getMouseEventInitProperties(event: MouseEvent) {
+  const {
+    // EventInit:
+    bubbles,
+    cancelable,
+    composed,
+    // UIEventInit:
+    detail,
+    view,
+    // EventModifierInit:
+    altKey,
+    ctrlKey,
+    metaKey,
+    shiftKey,
+    // MouseEventInit:
+    button,
+    buttons,
+    clientX,
+    clientY,
+    movementX,
+    movementY,
+    relatedTarget,
+    screenX,
+    screenY,
+  } = event
+  return {
+    // EventInit:
+    bubbles,
+    cancelable,
+    composed,
+    // UIEventInit:
+    detail,
+    view,
+    // EventModifierInit:
+    altKey,
+    ctrlKey,
+    metaKey,
+    modifierAltGraph: event.getModifierState('AltGraph'),
+    modifierCapsLock: event.getModifierState('CapsLock'),
+    modifierFn: event.getModifierState('Fn'),
+    modifierFnLock: event.getModifierState('FnLock'),
+    modifierHyper: event.getModifierState('Hyper'),
+    modifierNumLock: event.getModifierState('NumLock'),
+    modifierScrollLock: event.getModifierState('ScrollLock'),
+    modifierSuper: event.getModifierState('Super'),
+    modifierSymbol: event.getModifierState('Symbol'),
+    modifierSymbolLock: event.getModifierState('SymbolLock'),
+    shiftKey,
+    // MouseEventInit:
+    button,
+    buttons,
+    clientX,
+    clientY,
+    movementX,
+    movementY,
+    relatedTarget,
+    screenX,
+    screenY,
+    // Specific known sub-types:
+    ...(event instanceof DragEvent ? getDragEventInitProperties(event) : {}),
+    ...(event instanceof PointerEvent
+      ? getPointerEventInitProperties(event)
+      : {}),
+    ...(event instanceof WheelEvent ? getWheelEventInitProperties(event) : {}),
+  }
+}
+
+function getDragEventInitProperties(event: DragEvent) {
+  const { dataTransfer } = event
+  return { dataTransfer }
+}
+
+function getPointerEventInitProperties(event: PointerEvent) {
+  const {
+    height,
+    isPrimary,
+    pointerId,
+    pointerType,
+    pressure,
+    tangentialPressure,
+    tiltX,
+    tiltY,
+    twist,
+    width,
+  } = event
+  const coalescedEvents = event.getCoalescedEvents()
+  const predictedEvents = event.getPredictedEvents()
+  return {
+    coalescedEvents,
+    height,
+    isPrimary,
+    pointerId,
+    pointerType,
+    predictedEvents,
+    pressure,
+    tangentialPressure,
+    tiltX,
+    tiltY,
+    twist,
+    width,
+  }
+}
+
+function getWheelEventInitProperties(event: WheelEvent) {
+  const { deltaMode, deltaX, deltaY, deltaZ } = event
+  return {
+    deltaMode,
+    deltaX,
+    deltaY,
+    deltaZ,
+  }
+}
+
+/**
+ * Instantiates a new `MouseEvent` (or derivative) class.
+ *
+ * @param original Class to create a new instance of.
+ * @param type Event type, e.g. 'click'.
+ * @param initDict `MouseEventInit` (or derivative) init properties.
+ * @returns A new `MouseEvent` (or derivative) with the supplied properties.
+ */
+function constructMouseEvent(
+  original: MouseEvent,
+  type: string,
+  initDict: MouseEventInit
+) {
+  const ctor = original.constructor
+  return new (ctor.bind.apply(ctor, [null, type, initDict]))()
 }

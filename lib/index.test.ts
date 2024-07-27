@@ -568,6 +568,34 @@ describe('dispatchToUnderlyingElements', () => {
       ])
     })
 
+    test('event class and properties propagated', () => {
+      let receivedEvent!: PointerEvent
+      docById('lowest').addEventListener(
+        'pointerdown',
+        (event: PointerEvent) => {
+          receivedEvent = event
+        }
+      )
+
+      docById('container').addEventListener(
+        'pointerdown',
+        dispatchToUnderlyingElements
+      )
+
+      document.elementFromPoint(0, 0)!.dispatchEvent(
+        new PointerEvent('pointerdown', {
+          view: window,
+          bubbles: true,
+          clientX: 0,
+          clientY: 0,
+          pointerId: 1,
+        })
+      )
+
+      expect(receivedEvent).instanceOf(PointerEvent)
+      expect(receivedEvent.pointerId).toBe(1)
+    })
+
     test('already cancelled event prevents further dispatch', () => {
       logEventTarget('click', docById('highest'))
       logEventTarget('click', docById('lowest'))
