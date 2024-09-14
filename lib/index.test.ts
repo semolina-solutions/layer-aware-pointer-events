@@ -239,11 +239,16 @@ describe('elementTreeFromPoint', () => {
     expect(elementTreeFromPoint(-1, -1)!).toBe(null)
   })
 
-  test('empty tree', () => {
+  test('minimal tree', () => {
     render(html``, document.body)
-    const { root, elementsByParent: tree } = elementTreeFromPoint(0, 0)!
-    expect(root.tagName).toEqual('HTML')
-    expect(tree.size).toEqual(0)
+    const tree = elementTreeFromPoint(0, 0)!
+    expect(tree.root.tagName).toEqual('HTML')
+    expect(formatElementTree(tree)).toEqual(
+      strip(`
+        HTML
+        * BODY
+      `)
+    )
   })
 
   test('single div', () => {
@@ -251,10 +256,10 @@ describe('elementTreeFromPoint', () => {
     const tree = elementTreeFromPoint(0, 0)!
     expect(formatElementTree(tree)).toEqual(
       strip(`
-      HTML
-      * BODY
-        * DIV
-  `)
+        HTML
+        * BODY
+          * DIV
+      `)
     )
   })
 
@@ -282,15 +287,15 @@ describe('elementTreeFromPoint', () => {
     const tree = elementTreeFromPoint(0, 0)!
     expect(formatElementTree(tree)).toEqual(
       strip(`
-      HTML
-      * BODY
-        * DIV#2
-          * DIV#2.2
-          * DIV#2.1
-        * DIV#1
-          * DIV#1.2
-          * DIV#1.1
-  `)
+        HTML
+        * BODY
+          * DIV#2
+            * DIV#2.2
+            * DIV#2.1
+          * DIV#1
+            * DIV#1.2
+            * DIV#1.1
+      `)
     )
   })
 
@@ -312,10 +317,10 @@ describe('elementTreeFromPoint', () => {
     const tree = elementTreeFromPoint(0, 0)!
     expect(formatElementTree(tree)).toEqual(
       strip(`
-      HTML
-      * BODY
-        * DIV#1.1
-  `)
+        HTML
+        * BODY
+          * DIV#1.1
+      `)
     )
   })
 
@@ -337,9 +342,9 @@ describe('elementTreeFromPoint', () => {
     const tree = elementTreeFromPoint(0, 0)!
     expect(formatElementTree(tree)).toEqual(
       strip(`
-      HTML
-      * DIV
-  `)
+        HTML
+        * DIV
+      `)
     )
   })
 
@@ -363,13 +368,13 @@ describe('elementTreeFromPoint', () => {
     const tree = elementTreeFromPoint(0, 0)!
     expect(formatElementTree(tree)).toEqual(
       strip(`
-      HTML
-      * BODY
-        * DIV#after-shadow-dom-element
-        * SHADOW-DOM-ELEMENT
-          * DIV#inside-shadow-dom-element
-        * DIV#before-shadow-dom-element
-  `)
+        HTML
+        * BODY
+          * DIV#after-shadow-dom-element
+          * SHADOW-DOM-ELEMENT
+            * DIV#inside-shadow-dom-element
+          * DIV#before-shadow-dom-element
+      `)
     )
   })
 
@@ -391,10 +396,10 @@ describe('elementTreeFromPoint', () => {
     const tree = elementTreeFromPoint(0, 0)!
     expect(formatElementTree(tree)).toEqual(
       strip(`
-      HTML
-      * BODY
-        * DIV#inside-shadow-dom-element
-  `)
+        HTML
+        * BODY
+          * DIV#inside-shadow-dom-element
+      `)
     )
   })
 
@@ -416,12 +421,12 @@ describe('elementTreeFromPoint', () => {
     const tree = elementTreeFromPoint(0, 0)!
     expect(formatElementTree(tree)).toEqual(
       strip(`
-      HTML
-      * BODY
-        * CONTAINING-SHADOW-DOM-ELEMENT
-          * SHADOW-DOM-ELEMENT
-            * DIV#inside-shadow-dom-element
-  `)
+        HTML
+        * BODY
+          * CONTAINING-SHADOW-DOM-ELEMENT
+            * SHADOW-DOM-ELEMENT
+              * DIV#inside-shadow-dom-element
+      `)
     )
   })
 
@@ -446,12 +451,12 @@ describe('elementTreeFromPoint', () => {
     const tree = elementTreeFromPoint(0, 0, mostInnerShadowRoot)!
     expect(formatElementTree(tree)).toEqual(
       strip(`
-      HTML
-      * BODY
-        * CONTAINING-SHADOW-DOM-ELEMENT
-          * SHADOW-DOM-ELEMENT
-            * DIV#inside-shadow-dom-element
-  `)
+        HTML
+        * BODY
+          * CONTAINING-SHADOW-DOM-ELEMENT
+            * SHADOW-DOM-ELEMENT
+              * DIV#inside-shadow-dom-element
+      `)
     )
   })
 
@@ -474,13 +479,13 @@ describe('elementTreeFromPoint', () => {
     const tree = elementTreeFromPoint(0, 0)!
     expect(formatElementTree(tree)).toEqual(
       strip(`
-      HTML
-      * BODY
-        * DIV
-        * CONTAINING-SHADOW-DOM-ELEMENT
-          * SHADOW-DOM-ELEMENT
-            * DIV#inside-shadow-dom-element
-  `)
+        HTML
+        * BODY
+          * DIV
+          * CONTAINING-SHADOW-DOM-ELEMENT
+            * SHADOW-DOM-ELEMENT
+              * DIV#inside-shadow-dom-element
+      `)
     )
   })
 })

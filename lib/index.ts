@@ -70,7 +70,7 @@ export function dispatchToUnderlyingElements(
   for (const element of subtree) {
     if (defaultPathElementSet.has(element)) continue
 
-    let clone = constructMouseEvent(event, type, eventInitDict)
+    const clone = constructMouseEvent(event, type, eventInitDict)
 
     element.dispatchEvent(clone)
     if (clone.defaultPrevented) {
@@ -371,8 +371,8 @@ function getPointerEventInitProperties(event: PointerEvent) {
     twist,
     width,
   } = event
-  const coalescedEvents = event.getCoalescedEvents()
-  const predictedEvents = event.getPredictedEvents()
+  const coalescedEvents = event.getCoalescedEvents?.()
+  const predictedEvents = event.getPredictedEvents?.()
   return {
     coalescedEvents,
     height,
